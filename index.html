@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Red Storm</title>
+<style>
+  body {
+    margin: 0;
+    background: black;
+    overflow: hidden;
+    font-family: system-ui;
+    color: white;
+  }
+  #player {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    width: 50px;
+    height: 50px;
+    background: cyan;
+    transform: translateX(-50%);
+  }
+  .enemy {
+    position: fixed;
+    top: -50px;
+    width: 40px;
+    height: 40px;
+    background: red;
+  }
+  #score {
+    position: fixed;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 22px;
+  }
+</style>
+</head>
+<body>
+
+<div id="score">시간: 0</div>
+<div id="player"></div>
+
+<script>
+  const player = document.getElementById("player");
+  const scoreText = document.getElementById("score");
+
+  let playerX = window.innerWidth / 2;
+  let alive = true;
+  let time = 0;
+  let speed = 3;
+
+  document.addEventListener("touchmove", e => {
+    playerX = e.touches[0].clientX;
+    player.style.left = playerX + "px";
+  });
+
+  function spawnEnemy() {
+    if (!alive) return;
+
+    const enemy = document.createElement("div");
+    enemy.className = "enemy";
+    enemy.style.left = Math.random() * (window.innerWidth - 40) + "px";
+    document.body.appendChild(enemy);
+
+    let y = -50;
+
+    const fall = setInterval(() => {
+      if (!alive) {
+        clearInterval(fall);
+        enemy.remove();
+        return;
+      }
+
+      y += speed;
+      enemy.style.top = y + "px";
+
+      const eRect = enemy.getBoundingClientRect();
+      const pRect = player.getBoundingClientRect();
+
+      if (
+        eRect.bottom >= pRect.top &&
+        eRect.left < pRect.right &&
+        eRect.right > pRect.left
+      ) {
+        alive = false;
+        alert("💀 게임 오버! 생존 시간: " + time);
+      }
+
+      if (y > window.innerHeight) {
+        clearInterval(fall);
+        enemy.remove();
+      }
+
+    }, 16);
+  }
+
+  setInterval(() => {
+    if (alive) {
+      time++;
+      scoreText.textContent = "시간: " + time;
+      speed += 0.2;
+      spawnEnemy();
+    }
+  }, 1000);
+</script>
+
+</body>
+</html>
